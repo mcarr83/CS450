@@ -1,0 +1,137 @@
+			+----------------------------+
+            | CS 450                     |
+            | PROJECT 3: PTHREAD SUDOKU  |
+            |   DESIGN DOCUMENT          |
+            +----------------------------+
+
+---- GROUP ----
+
+>> Fill in the names and email addresses of your group members.
+
+Gabrielle Luna <gluna@sonoma.edu>
+Michael Carr <carm@sonoma.edu>
+---- PRELIMINARIES ----
+
+>> If you have any preliminary comments on your submission, notes for the
+>> TAs, or extra credit, please give them here.
+
+>> Please cite any offline or online sources you consulted while
+>> preparing your submission.
+
+
+---- DATA STRUCTURES ----
+
+>> A1: Copy here the declaration of each new `struct',
+>> `struct' member, global or static variable, `typedef', or
+>> enumeration.  Identify the purpose of each in 25 words or less.
+
+This was added to be used during parsing to control the number of
+characters read in at a time.
+-#define BUFFERSIZE 100
+
+This was added to control the number of rows and columns used. Likely
+superfluous but habit
+//Global variables for sudoku dimensions
+int NumColumns = 9;
+int NumRows = 9;
+
+This was added as the arguments holder to be passed to each thread.
+Each thread needed to know where to begin looking in order to avoid 
+creating a million unique functions. They also needed to have access
+to the sudoku board. 
+//Struct to pass between threads
+typedef struct
+{
+  int row, col, isSolved;
+  int ** grid;
+}checkGrid;
+
+---- ALGORITHMS ----
+
+>> A2: Briefly describe how you communicated to each worker thread
+>> the work it should perform, as a void *
+
+The struct listed above provided a starting row and starting column 
+as well as a variable that could hold the state of each thread's check. 
+isSolved worked like a bool and held 'false' if the threads test failed. 
+
+>> A3: Briefly describe the function(s) run by each worker. Explain
+if you could reduce the number of functions, by generalizing each
+problem in some way.
+
+There were three functions used by the threads:
+1.) checkRows: Checked the row listed in the CheckGrid struct by marking 
+	any number stored in the row as 'seen' in a corresponding array
+2.) checkColumns: Checked the column listed in the CheckGrid struct by marking	
+	any number stored in the column as seen in the corresponding array
+3.) checkSquares: Checked the box containing row - row+2, and column - column+2
+	by marking any number stored in the square as seen in the corresponding array. 
+
+
+---- SYNCHRONIZATION ----
+
+>> A4: Explain how the main thread knows when all the worker
+>> threads have completed their work.
+
+A thread_join function was used to retrieve the output of all threads. 
+
+>> A5: Explain how the main thread knows when a particular worker
+>> thread has reported a property is missing.
+
+The fact a property was missing was stored in the struct passed to the 
+thread and not in the threads return value. 
+
+
+---- RATIONALE ----
+
+>> A6: Overzealous use of synchronization can cause code to become
+>> too serialized, and unable to take advantage of parallelism.
+>> Explain why you chose your design, arguing how it is highly 
+>> parallel, while the access to each resource is safe and deadlock free.
+
+My program had three threads running at any given time. One thread for each function was called and 'joined' in the
+same for-loop and the values passed to them were adjusted based on the value of i in the for
+loop. Had I called all of the threads before looking for any of their return values, I could 
+have improved on the parallelism achieved. It would have required more lines of code and more 
+care with the return values so I didn't do that. 
+
+>> A7: Explain how you ensured that your program has no resource leaks.
+>> List all the free-able resources and, for each, explain how you
+>> free them at the earliest possible time.
+
+1.) input file: we didn't open the input file in a traditional way so I was 
+	unsure of how to, or if I needed to, close the file. 
+
+2.) threads: Only three threads are declared, and then reused. the join function was used to 
+	retrieve the return value (which I chose not to use) and then exited the thread. 
+
+
+
+               SURVEY QUESTIONS
+               ================
+
+Answering these questions is optional, but it will help us improve the
+course in future quarters.  Feel free to tell us anything you
+want--these questions are just to spur your thoughts.  You may also
+choose to respond anonymously in the course evaluations at the end of
+the quarter.
+
+>> In your opinion, was this assignment, or any one of the problems
+>> in it, too easy or too hard?  Did it take too long or too little time?
+
+It was relatively easy, perhaps because I did not use threads in the way they were intended.
+I think the parameters of the project leave this part up to the student, which is just fine
+by me. 
+I did get to see my ouput jump around a little when enough errors were put into the sudoku 
+solution, which was cool. 
+
+>> Did you find that working on a particular part of the assignment gave
+>> you greater insight into some aspect of OS design?
+
+>> Is there some particular fact or hint we should give students in
+>> future quarters to help them solve the problems?  Conversely, did you
+>> find any of our guidance to be misleading?
+
+Maybe do this project first, before introducing pintos. Makes threads seem way less scary. 
+
+>> Any other comments?
